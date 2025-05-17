@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="../style.css">
+  <title>Stopwatch</title>
+</head>
+<body>
+  <div class="container">
+    <h1>Stopwatch</h1>
+
+    <% if (isRunning) { %>
+      <h2 id="timer">Running: 00:00:00:000</h2>
+      <script>
+        const startTime = new Date("<%= startTime.toISOString() %>").getTime();
+
+        function formatTime(ms) {
+          const msStr = String(ms % 1000).padStart(3, '0');
+          const s = Math.floor(ms / 1000);
+          const hStr = String(Math.floor(s / 3600)).padStart(2, '0');
+          const mStr = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+          const sStr = String(s % 60).padStart(2, '0');
+          return `${hStr}:${mStr}:${sStr}:${msStr}`;
+        }
+
+        function updateTimer() {
+          const now = Date.now();
+          const diff = now - startTime;
+          document.getElementById('timer').innerText = `Running: ${formatTime(diff)}`;
+        }
+
+        setInterval(updateTimer, 50);
+        updateTimer();
+      </script>
+    <% } else { %>
+      <h2>Stopped</h2>
+    <% } %>
+
+    <form action="/start" method="POST">
+      <button type="submit" <%= isRunning ? 'disabled' : '' %>>Start</button>
+    </form>
+    <form action="/stop" method="POST">
+      <button type="submit" <%= !isRunning ? 'disabled' : '' %>>Stop</button>
+    </form>
+    <form action="/reset" method="POST">
+      <button type="submit">Reset All Sessions</button>
+    </form>
+
+    <h2>Sessions</h2>
+    <ul>
+      <% sessions.forEach(session => { %>
+        <li>
+          Started at: <%= session.startTime.toLocaleString() %> |
+          Duration: <%= session.duration %> seconds
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+</body>
+</html>
